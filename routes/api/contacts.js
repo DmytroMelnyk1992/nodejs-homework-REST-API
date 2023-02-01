@@ -7,7 +7,7 @@ const {
   updateContact,
 } = require("../../models/contacts");
 const createError = require("../../helpers/createError");
-const { newContacts, editContacts } = require("../../helpers/validation");
+const { newContacts } = require("../../helpers/validation");
 
 const router = express.Router();
 
@@ -40,8 +40,7 @@ router.post("/", async (req, res, next) => {
       throw createError(400, "missing required name field");
     }
     const result = await addContact(req.body);
-    res.status(201).json({ result, message: "template message" });
-    res.json();
+    res.status(201).json({ result, message: "User was created successfully!" });
   } catch (error) {
     next(error);
   }
@@ -63,10 +62,7 @@ router.delete("/:contactId", async (req, res, next) => {
 router.put("/:contactId", async (req, res, next) => {
   try {
     const { body } = req;
-    const { error } = editContacts.validate(body);
-    if (error || !Object.keys(body).length) {
-      throw createError(400, "missing fields");
-    }
+
     const { contactId } = req.params;
     const result = await updateContact(contactId, body);
     if (!result) {
