@@ -1,13 +1,11 @@
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 const dotenv = require("dotenv");
+const app = require("./app");
 dotenv.config();
-
 const { HOST_URI } = process.env;
 
-const app = require("./app");
-
-async function main() {
+(async function () {
   try {
     await mongoose.connect(HOST_URI);
     console.log("Database connection successful");
@@ -18,5 +16,4 @@ async function main() {
     console.error("Connection failed", error.message);
     process.exit(1);
   }
-}
-main();
+})();

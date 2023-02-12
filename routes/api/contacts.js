@@ -19,26 +19,46 @@ const {
   validateUpdatedContact,
 } = require("../../helpers/validationWrapper");
 
-const tryCatchWrapper = require("../../helpers/tryCatchWrapper ");
+const tryCatchWrapper = require("../../helpers/tryCatchWrapper");
+const tokenValidation = require("../../helpers/tokenValidation");
 
 const router = express.Router();
 
-router.get("/", tryCatchWrapper(getAllContacts));
+router.get(
+  "/",
+  tryCatchWrapper(tokenValidation),
+  tryCatchWrapper(getAllContacts)
+);
 
-router.get("/:contactId", tryCatchWrapper(getContactById));
+router.get(
+  "/:contactId",
+  tryCatchWrapper(tokenValidation),
+  tryCatchWrapper(getContactById)
+);
 
-router.post("/", validateContact(newContacts), tryCatchWrapper(addContact));
+router.post(
+  "/",
+  tryCatchWrapper(tokenValidation),
+  validateContact(newContacts),
+  tryCatchWrapper(addContact)
+);
 
-router.delete("/:contactId", tryCatchWrapper(removeContact));
+router.delete(
+  "/:contactId",
+  tryCatchWrapper(tokenValidation),
+  tryCatchWrapper(removeContact)
+);
 
 router.put(
   "/:contactId",
+  tryCatchWrapper(tokenValidation),
   validateUpdatedContact(editContacts),
   tryCatchWrapper(updateContact)
 );
 
 router.patch(
   "/:contactId/favorite",
+  tryCatchWrapper(tokenValidation),
   validateContact(favoriteSchema),
   tryCatchWrapper(updateStatusOfContact)
 );

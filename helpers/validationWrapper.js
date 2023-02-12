@@ -4,8 +4,7 @@ function validateContact(schema) {
     if (error) {
       return res.status(404).json({ message: "missing fields" });
     }
-
-    return next();
+return next();
   };
 }
 
