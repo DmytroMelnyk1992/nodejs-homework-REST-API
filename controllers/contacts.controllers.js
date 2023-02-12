@@ -12,15 +12,12 @@ async function getContactById(req, res) {
   if (!contactById) {
     return res.status(404).json({ message: "Not found" });
   }
-
-  res.status(200).json(contactById);
+res.status(200).json(contactById);
 }
 
 async function addContact(req, res) {
   const body = req.body;
   const newContact = await Contact.create(body);
-  //   console.log("New Contact", newContact);
-
   res.status(201).json(newContact);
 }
 
@@ -40,7 +37,6 @@ async function updateContact(req, res) {
   const updatedContact = await Contact.findByIdAndUpdate(contactId, req.body, {
     new: true,
   });
-  //   console.log("Contact is updated", updatedContact);
   if (!updatedContact) {
     return res.status(404).json({ message: "Not found" });
   }

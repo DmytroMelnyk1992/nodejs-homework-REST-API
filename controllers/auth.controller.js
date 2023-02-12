@@ -1,23 +1,19 @@
 const { User } = require("../models/user");
-
 const { Conflict, Unauthorized } = require("http-errors");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const { JWT_SECRET } = process.env;
 
-const bcrypt = require("bcrypt");
 async function register(req, res, next) {
   const { email, password } = req.body;
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
-
-  console.log(email, password);
   try {
     const savedUser = await User.create({
       email,
       password: hashedPassword,
     });
-
     res.status(201).json({
       data: {
         user: savedUser,
@@ -35,7 +31,6 @@ async function register(req, res, next) {
 
 async function login(req, res, next) {
   const { email, password } = req.body;
-
   const storedUser = await User.findOne({
     email,
   });
@@ -46,12 +41,9 @@ async function login(req, res, next) {
   if (!isPasswordValid) {
     throw Unauthorized(401, "Email or password is wrong");
   }
-
   const payload = { id: storedUser._id };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
-
   await User.findByIdAndUpdate(storedUser._id, { token });
-
   return res.status(200).json({
     token: token,
     user: {
@@ -64,9 +56,7 @@ async function login(req, res, next) {
 
 async function logout(req, res, next) {
   const storedUser = req.user;
-
   await User.findByIdAndUpdate(storedUser._id, { token: "" });
-
   return res.status(204).end();
 }
 
@@ -84,13 +74,9 @@ async function userInfo(req, res, next) {
 
 async function updateSubscription(req, res, next) {
   const { id } = req.user;
-  console.log("id", id);
-
   const { subscription } = req.body;
   console.log("subscription", subscription);
-
   const upUser = await User.findByIdAndUpdate(id, req.body, { new: true });
-
   res.status(200).json(upUser);
 }
 

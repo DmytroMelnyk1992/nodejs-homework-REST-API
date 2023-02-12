@@ -1,13 +1,8 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
-
-// maybe it must be in routes? //
-
 const contactsRouter = require("./routes/api/contacts");
 const { authRouter } = require("./routes/auth");
-
-// maybe it must be in routes? --- end of the question //
 
 const app = express();
 
