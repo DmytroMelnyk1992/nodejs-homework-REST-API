@@ -1,13 +1,11 @@
-const tryCatchWrapper = (tryCatch) => {
-  const func = async (req, res, next) => {
+function tryCatchWrapper(enpointFn) {
+  return async (req, res, next) => {
     try {
-      await tryCatch(req, res, next);
+      await enpointFn(req, res, next);
     } catch (error) {
-      next(error);
+      return next(error);
     }
   };
-
-  return func;
-};
+}
 
 module.exports = tryCatchWrapper;

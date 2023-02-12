@@ -18,10 +18,10 @@ async function getContactById(req, res) {
 
 async function addContact(req, res) {
   const body = req.body;
-  const NewContact = await Contact.create(body);
-  //   console.log("New Contact", NewContact);
+  const newContact = await Contact.create(body);
+  //   console.log("New Contact", newContact);
 
-  res.status(201).json(NewContact);
+  res.status(201).json(newContact);
 }
 
 async function removeContact(req, res) {
