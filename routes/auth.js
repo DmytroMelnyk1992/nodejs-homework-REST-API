@@ -5,6 +5,8 @@ const {
   logout,
   userInfo,
   updateSubscription,
+  verifyEmail,
+  repeatVerifyEmail,
   uploadAvatar,
 } = require("../controllers/auth.controller");
 const tryCatchWrapper = require("../helpers/tryCatchWrapper");
@@ -45,6 +47,9 @@ authRouter.patch(
   upload.single("avatar"),
   tryCatchWrapper(uploadAvatar)
 );
+
+authRouter.get("/verify/:verificationToken", tryCatchWrapper(verifyEmail));
+authRouter.post("/verify", tryCatchWrapper(repeatVerifyEmail));
 
 module.exports = {
   authRouter,

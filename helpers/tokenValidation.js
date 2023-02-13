@@ -10,10 +10,18 @@ async function tokenValidation(req, res, next) {
   if (type !== "Bearer" || !token) {
     throw Unauthorized("Not authorized");
   }
-try {
+  try {
     const { id } = jwt.verify(token, JWT_SECRET);
+
     const user = await User.findById(id);
-req.user = user;
+
+    if (!user.token || user.token !== token) {
+      return res.status(401).json({
+        message: "Not authorized",
+      });
+    }
+
+    req.user = user;
   } catch (error) {
     if (error.name === "JsonWebTokenError") {
       throw Unauthorized("Not authorized");
