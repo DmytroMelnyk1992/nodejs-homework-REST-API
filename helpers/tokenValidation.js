@@ -14,12 +14,14 @@ async function tokenValidation(req, res, next) {
     const { id } = jwt.verify(token, JWT_SECRET);
 
     const user = await User.findById(id);
-    req.user = user;
-    if (user.token !== token || !user.token) {
+
+    if (!user.token || user.token !== token) {
       return res.status(401).json({
         message: "Not authorized",
       });
     }
+
+    req.user = user;
   } catch (error) {
     if (error.name === "JsonWebTokenError") {
       throw Unauthorized("Not authorized");
