@@ -5,6 +5,7 @@ const {
   logout,
   userInfo,
   updateSubscription,
+  uploadAvatar,
 } = require("../controllers/auth.controller");
 const tryCatchWrapper = require("../helpers/tryCatchWrapper");
 const {
@@ -13,6 +14,7 @@ const {
 } = require("../helpers/validationUsersSubscription");
 const { validationAuth } = require("../helpers/validationAuth");
 const { tokenValidation } = require("../helpers/tokenValidation");
+const { upload } = require("../helpers/uploadAvatar.js");
 
 const authRouter = express.Router();
 
@@ -37,6 +39,11 @@ authRouter.patch(
   tryCatchWrapper(tokenValidation),
   validationAuth(updateUserSubscription),
   tryCatchWrapper(updateSubscription)
+);
+authRouter.patch(
+  "/avatars",
+  upload.single("avatar"),
+  tryCatchWrapper(uploadAvatar)
 );
 
 module.exports = {
