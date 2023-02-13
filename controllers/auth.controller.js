@@ -1,5 +1,5 @@
 const { User } = require("../models/user");
-const { Conflict, Unauthorized, NotFound } = require("http-errors");
+const { Conflict, Unauthorized, NotFound, BadRequest } = require("http-errors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const gravatar = require("gravatar");
@@ -121,9 +121,7 @@ async function repeatVerifyEmail(req, res, next) {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({
-      message: "Missing required field email",
-    });
+    throw BadRequest("Missing required field email");
   }
 
   try {
@@ -132,17 +130,13 @@ async function repeatVerifyEmail(req, res, next) {
     });
 
     if (!storedUser) {
-      return res.status(400).json({
-        message: "User not found",
-      });
+      throw BadRequest("User not found");
     }
 
     const verificationToken = storedUser.verificationToken;
 
     if (!verificationToken) {
-      return res.status(400).json({
-        message: "Verification has already been passed",
-      });
+      throw BadRequest("Verification has already been passed");
     }
 
     await sendMail({
