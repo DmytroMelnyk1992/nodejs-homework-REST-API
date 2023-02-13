@@ -1,24 +1,35 @@
 const { User } = require("../models/user");
-const { Conflict, Unauthorized } = require("http-errors");
+const { Conflict, Unauthorized, NotFound } = require("http-errors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const gravatar = require("gravatar");
 const path = require("path");
 const fs = require("fs/promises");
 const Jimp = require("jimp");
-
+const { nanoid } = require("nanoid");
+const { sendMail } = require("../helpers/sendMail");
 const { JWT_SECRET } = process.env;
 
 async function register(req, res, next) {
   const { email, password } = req.body;
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
+
+  const verificationToken = nanoid();
+
   try {
     const savedUser = await User.create({
       email,
       password: hashedPassword,
       avatarURL: gravatar.url(email),
     });
+
+    await sendMail({
+      to: email,
+      subject: "Please confirm your email",
+      html: `<a href="localhost:3000/api/users/verify/${verificationToken}">Confirm your email</a>`,
+    });
+
     res.status(201).json({
       data: {
         user: savedUser,
@@ -85,6 +96,74 @@ async function updateSubscription(req, res, next) {
   res.status(200).json(upUser);
 }
 
+async function verifyEmail(req, res, next) {
+  const { verificationToken } = req.params;
+
+  const user = await User.findOne({
+    verificationToken: verificationToken,
+  });
+
+  if (!user) {
+    throw NotFound("User not found");
+  }
+
+  await User.findByIdAndUpdate(user._id, {
+    verificationToken: null,
+    verify: true,
+  });
+
+  return res.status(200).json({
+    message: "Verification successful",
+  });
+}
+
+async function repeatVerifyEmail(req, res, next) {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      message: "Missing required field email",
+    });
+  }
+
+  try {
+    const storedUser = await User.findOne({
+      email,
+    });
+
+    if (!storedUser) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    const verificationToken = storedUser.verificationToken;
+
+    if (!verificationToken) {
+      return res.status(400).json({
+        message: "Verification has already been passed",
+      });
+    }
+
+    await sendMail({
+      to: email,
+      subject: "Please confirm your email",
+      html: `<a href="localhost:3000/api/users/verify/${verificationToken}">Confirm your email</a>`,
+    });
+
+    res.status(201).json({
+      user: {
+        email,
+        subscription: storedUser.subscription,
+        id: storedUser._id,
+        avatarURL: storedUser.avatarURL,
+      },
+    });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+}
+
 async function uploadAvatar(req, res, next) {
   const { id } = req.user;
   const { filename } = req.file;
@@ -130,5 +209,7 @@ module.exports = {
   logout,
   userInfo,
   updateSubscription,
+  verifyEmail,
+  repeatVerifyEmail,
   uploadAvatar,
 };
